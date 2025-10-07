@@ -1,0 +1,319 @@
+{
+  "name": "AI Destekli Oyuncu Geri Bildirim Analizi (Gemini 2.5 Flash)",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "path": "player-feedback-gemini-2-5",
+        "options": {}
+      },
+      "name": "Oyuncu Yorumu Webhook'u",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ],
+      "webhookId": "YOUR_UNIQUE_WEBHOOK_ID_HERE"
+    },
+    {
+      "parameters": {
+        "model": "gemini-flash-latest",
+        "text": "SENARYO:\nSen bir oyun firmasında çalışan kıdemli bir Topluluk Analistisin. Görevin, oyuncu yorumlarını analiz edip yapılandırılmış veriye dönüştürmektir. Senden istenen, yorumu analiz edip sonucu MUTLAKA aşağıdaki JSON formatında, başka hiçbir ek metin olmadan, doğrudan vermendir.\n\nJSON FORMATI:\n{\n  \"sentiment\": \"Pozitif\", \"Negatif\" veya \"Nötr\" arasından biri,\n  \"topic\": \"Hata Bildirimi\", \"Özellik İsteği\", \"Oynanış Deneyimi\", \"Fiyatlandırma\" veya \"Diğer\" arasından biri,\n  \"summary\": \"Yorumun ana fikrini içeren tek cümlelik özet\"\n}\n\nANALİZ EDİLECEK YORUM:\n\"{{$json.body.comment}}\""
+      },
+      "name": "Yapay Zeka: Gemini ile Analiz Et",
+      "type": "n8n-nodes-base.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        300
+      ],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "YOUR_GOOGLE_GEMINI_CREDENTIAL_ID",
+          "name": "My Google Gemini"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.topic}}",
+              "operation": "equal",
+              "value2": "Hata Bildirimi"
+            },
+            {
+              "value1": "={{$json.topic}}",
+              "operation": "equal",
+              "value2": "Özellik İsteği"
+            }
+          ]
+        }
+      },
+      "name": "Yoruma Göre Yönlendir",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#bugs",
+        "text": "=🐞 *Yeni Hata Bildirimi Geldi!*\n\n*Yorum:* \n> {{$json.originalComment}}\n\n*Duygu Tonu:* `{{$json.sentiment}}`"
+      },
+      "name": "Slack: #bugs kanalına gönder",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [
+        1660,
+        -100
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "My Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "note": "BURAYA JIRA DÜĞÜMÜ EKLE\n\n- Bir 'Bug' kaydı oluştur.\n- Başlık olarak 'summary' alanını kullan.\n- Açıklama kısmına 'originalComment' ve 'sentiment' verilerini ekle."
+      },
+      "name": "Yapılacak: JIRA'da Kayıt Oluştur",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        -100
+      ],
+      "color": {
+        "r": 255,
+        "g": 107,
+        "b": 107
+      }
+    },
+    {
+      "parameters": {
+        "note": "BURAYA NOTION DÜĞÜMÜ EKLE\n\n- 'Ürün Fikirleri' veritabanına yeni bir sayfa ekle.\n- Sayfa başlığı olarak 'summary' alanını kullan.\n- Sayfa içeriğine 'originalComment' alanını ekle."
+      },
+      "name": "Yapılacak: Notion'a Fikir Ekle",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        280
+      ],
+      "color": {
+        "r": 107,
+        "g": 178,
+        "b": 255
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#product-ideas",
+        "text": "=💡 *Yeni Özellik İsteği Geldi!*\n\n*Yorum:* \n> {{$json.originalComment}}\n\n*Özet:* {{$json.summary}}"
+      },
+      "name": "Slack: #product-ideas kanalına gönder",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [
+        1660,
+        280
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "My Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#community-feed",
+        "text": "=💬 *Yeni Genel Yorum Geldi (Manuel İncelenecek)*\n\n*Konu:* `{{$json.topic}}`\n*Duygu:* `{{$json.sentiment}}`\n\n*Yorum:*\n>{{$json.originalComment}}"
+      },
+      "name": "Slack: #community-feed'e gönder",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        580
+      ],
+      "credentials": {
+        "slackApi": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "My Slack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "note": "BURAYA GOOGLE SHEETS DÜĞÜMÜ EKLE\n\nHer bir yorumu, analiz sonuçlarını ve hangi kanala yönlendirildiğini yeni bir satır olarak kaydet. Sütunlar:\n- Zaman Damgası\n- Yorum Metni\n- Duygu\n- Konu\n- Yönlendirilen Kanal"
+      },
+      "name": "Yapılacak: Google Sheets'e Logla",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        300
+      ],
+      "color": {
+        "r": 122,
+        "g": 229,
+        "b": 130
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = JSON.parse($json.text);\nconst originalComment = $('Oyuncu Yorumu Webhook\\'u').item.json.body.comment;\n\n// Gelen tüm verileri birleştirerek sonraki adımlara hazırla\nreturn {\n  ...aiResponse,\n  originalComment: originalComment\n};"
+      },
+      "name": "AI Yanıtını Ayrıştır ve Birleştir",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Oyuncu Yorumu Webhook'u",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Oyuncu Yorumu Webhook'u": {
+      "main": [
+        [
+          {
+            "node": "Yapay Zeka: Gemini ile Analiz Et",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yapay Zeka: Gemini ile Analiz Et": {
+      "main": [
+        [
+          {
+            "node": "AI Yanıtını Ayrıştır ve Birleştir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yoruma Göre Yönlendir": {
+      "main": [
+        [
+          {
+            "node": "Yapılacak: JIRA'da Kayıt Oluştur",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Yapılacak: Notion'a Fikir Ekle",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Slack: #community-feed'e gönder",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Slack: #bugs kanalına gönder": {
+      "main": [
+        [
+          {
+            "node": "Yapılacak: Google Sheets'e Logla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yapılacak: JIRA'da Kayıt Oluştur": {
+      "main": [
+        [
+          {
+            "node": "Slack: #bugs kanalına gönder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yapılacak: Notion'a Fikir Ekle": {
+      "main": [
+        [
+          {
+            "node": "Slack: #product-ideas kanalına gönder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: #product-ideas kanalına gönder": {
+      "main": [
+        [
+          {
+            "node": "Yapılacak: Google Sheets'e Logla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: #community-feed'e gönder": {
+      "main": [
+        [
+          {
+            "node": "Yapılacak: Google Sheets'e Logla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Yanıtını Ayrıştır ve Birleştir": {
+      "main": [
+        [
+          {
+            "node": "Yoruma Göre Yönlendir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
