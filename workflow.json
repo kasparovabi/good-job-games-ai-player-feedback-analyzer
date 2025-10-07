@@ -23,12 +23,12 @@
         480,
         300
       ],
-      "webhookId": "YOUR_UNIQUE_WEBHOOK_ID_HERE"
+      "webhookId": "WEBHOOK_ID_HERE"
     },
     {
       "parameters": {
         "model": "gemini-flash-latest",
-        "text": "SENARYO:\nSen bir oyun firmasında çalışan kıdemli bir Topluluk Analistisin. Görevin, oyuncu yorumlarını analiz edip yapılandırılmış veriye dönüştürmektir. Senden istenen, yorumu analiz edip sonucu MUTLAKA aşağıdaki JSON formatında, başka hiçbir ek metin olmadan, doğrudan vermendir.\n\nJSON FORMATI:\n{\n  \"sentiment\": \"Pozitif\", \"Negatif\" veya \"Nötr\" arasından biri,\n  \"topic\": \"Hata Bildirimi\", \"Özellik İsteği\", \"Oynanış Deneyimi\", \"Fiyatlandırma\" veya \"Diğer\" arasından biri,\n  \"summary\": \"Yorumun ana fikrini içeren tek cümlelik özet\"\n}\n\nANALİZ EDİLECEK YORUM:\n\"{{$json.body.comment}}\""
+        "text": "SENARYO:\nSen bir oyun firmasında çalışan kıdemli bir Topluluk Analistisin. Görevin, oyuncu yorumlarını analiz edip yapılandırılmış veriye dönüştürmektir. Senden istenen, yorumu analiz edip sonucu MUTLAKA JSON formatında, başka hiçbir ek metin olmadan, doğrudan vermendir.\n\nJSON FORMATI:\n{\n  \"sentiment\": \"Pozitif\", \"Negatif\" veya \"Nötr\" arasından biri,\n  \"topic\": \"Hata Bildirimi\", \"Özellik İsteği\", \"Oynanış Deneyimi\", \"Fiyatlandırma\" veya \"Diğer\" arasından biri,\n  \"summary\": \"Yorumun ana fikrini içeren tek cümlelik özet\"\n}\n\nANALİZ EDİLECEK YORUM:\n\"{{$json.body.comment}}\""
       },
       "name": "Yapay Zeka: Gemini ile Analiz Et",
       "type": "n8n-nodes-base.googleGemini",
@@ -83,7 +83,7 @@
       ],
       "credentials": {
         "slackApi": {
-          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "id": "SLACK_CREDENTIAL_ID",
           "name": "My Slack"
         }
       }
@@ -316,4 +316,5 @@
       ]
     }
   }
+
 }
