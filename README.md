@@ -1,5 +1,4 @@
 # AI Destekli Oyuncu Geri Bildirim Analiz Otomasyonu
-Good Job Games'in AI Engineer pozisyonu için proaktif bir başvuru projesi olarak geliştirilmiştir.
 
 **[▶️ Projenin Çalışmasını İzleyin (Video Demo)] https://www.loom.com/share/a096887d7df84dca85ea4e91e8602c8b?sid=08302e7f-7559-4f01-9e37-0e5578fca48f**
 
